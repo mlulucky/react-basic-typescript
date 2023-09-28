@@ -8,9 +8,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   // 렌더 : 화면에 그리다
-  <React.StrictMode>
     <App />
-  </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function
