@@ -10,9 +10,10 @@ export type ListProps = {
 
 type DiaryListProps = {
   dummyData: ListProps[];
+	onDelete: (id: number) => void;
 };
 
-const DiaryList = ({ dummyData }: DiaryListProps) => {
+const DiaryList = ({ dummyData, onDelete }: DiaryListProps) => {
   // 비구조화 할당
   console.log(dummyData);
 
@@ -23,7 +24,7 @@ const DiaryList = ({ dummyData }: DiaryListProps) => {
       <div>
         {dummyData.map((ele)=> // {...ele} : ele 에 포함된 모든 객체데이터를 props 를 전달
 				  (
-            <DiaryItem key={ele.id} {...ele} />
+            <DiaryItem key={ele.id} {...ele} onDelete={onDelete}/>
           ),
         )}
       </div>
