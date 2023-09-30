@@ -1,48 +1,58 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const DiaryEditor = () => {
 	// state 를 이용하는 방법이 동일하다 => 하나의 state 로 묶을 수 있다. => 객체로 전달
 	const [state, setState] = useState({
 		author: "", 
-		content: ""
+		content: "",
+		emotion: 1,
 	});
+
+	// 같은 기능의 함수 => 하나의 함수로 묶을 수 있다.
+	// 🍒 상태변환 함수 => 이벤트 핸들러 함수로 하나로 합칠 수 있다.
+	const changeHandler = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
+		console.log("e.target.name",e.target.name);
+		console.log("e.target.value",e.target.value);
+		setState({
+			...state,
+			[e.target.name]: e.target.value // 객체 속성 이름을 동적으로 설정 => [객체속성이름] 대괄호로 감싸기
+		})
+		// 상태변경 함수 내에서는 아직 변경된 상태값이 state 에 반영이 안됨
+	}
+	function handleSubmit(): void {
+		console.log(state);
+		alert("일기저장 성공");
+	}
 
 	return (
 		<div className="DiaryEditor">
 			<h2>오늘의 일기</h2>
 			{/* 작성자 입력 */}
 			<div>
-				<input name="author" value={state.author} onChange={ // e.target : 이벤트가 발생한 태그
-					(e)=> { // onChange 의 event 객체를 매개변수로 받는다.
-						console.log(e.target.value);
-						setState({ // state 객체 값 변경 // 객체의 값을 변경하려면 새로운 객체의 값을 전달해야함 // 🍒 setState(새로운 객체)
-							...state, // 기존 state 값(state.author, state.content)을 전달
-							author: e.target.value, // 새로 입력한 값으로 업데이트 // => 업데이트할 값을 나중에 적는다.(값 업데이트)
-							// content: state.content // 기존 state 값을 전달
-						})
-					}
-				}/>
+				<input name="author" value={state.author} onChange={changeHandler}/>
 			</div>
 			
 			{/* 일기본문 */}
 			<div>
-				<textarea name="content" value={state.content} onChange={
-					(e) => {
-						console.log(e.target.value);
-						setState({
-							...state,
-							// author: state.author,
-							content: e.target.value
-						})
-					}
-				}/>
+				<textarea name="content" value={state.content} onChange={changeHandler}/>
 			</div>
 
 			{/* 감정점수 */}
-
-
+			<div>
+				오늘의 감정점수 : 
+				<select name="emotion" value={state.emotion} onChange={changeHandler}>
+					<option value={1}>1</option>
+					<option value={2}>2</option>
+					<option value={3}>3</option>
+					<option value={4}>4</option>
+					<option value={5}>5</option>
+				</select>
+			</div>
 
 			{/* 저장하기 버튼 */}
+			<div>
+				<button onClick={handleSubmit}>일기 저장하기</button>
+			</div>
 		</div>
 	)
 }
