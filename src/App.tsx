@@ -3,6 +3,8 @@ import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList, { ListProps } from "./DiaryList";
 import LifeCycle from "./LifeCycle";
+import OptimizeTest from "./OptimizeTest_Primitive";
+import OptimizeTest_Reference from "./OptimizeTest_Reference";
 
 type APIData = {
 	email : string,
@@ -28,7 +30,6 @@ function App() {
 				create_date
 			}
 		})
-
 		setData(apiData);
 	}
 
@@ -80,6 +81,7 @@ function App() {
 
   return (
     <div className="App">
+			<OptimizeTest_Reference />
       <DiaryEditor onCreate={createDiary}/>
 			<div>전체 일기 : {data.length}</div>
 			<div>기분 좋은 일기 개수 : {goodCount}</div>
