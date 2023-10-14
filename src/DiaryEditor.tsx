@@ -1,9 +1,17 @@
+import React, { useEffect } from "react";
 import { useRef, useState } from "react";
 import { ListProps } from "./DiaryList";
 
-// onCreate 함수의 매개변수(diary:ListProps) 에서 diary 는 onCreate 함수 내부에서 사용하는 변수 이름
 // 함수 내에서 diary 라는 이름으로 ListProps 타입 객체를 사용할 수 있다. (React 컴포넌트에서 props 전달시, 해당 변수의 이름과 타입만 중요, 함수 내부의 변수이름은 무관하다.)
-const DiaryEditor = ({onCreate} : {onCreate: ( diary : Omit<ListProps, "id"| "create_date">) => void}) => {
+// 🍒 App 컴포넌트가 리렌더링 될때 DiaryEditor 에서 props 로 받은 onCreate 함수도 다시 생성이 된다.
+// => props 데이터가 변경 되면 컴포넌트도 리렌더링된다. 즉 DiaryEditor 컴포넌트가 재렌더링이된다.
+// => 최적화 하기위해서 onCreate 함수를 재생성하지 않도록 하기!
+// => App 컴포넌트에서 onCreate 함수에 useCallback 최적화하기!
+const DiaryEditor = ({onCreate} : {onCreate : (함수매개변수이름 : Omit<ListProps, "id"| "create_date">) => void}) => {
+	useEffect(()=>{ // 렌더링 체크
+		console.log("DiaryEditor 렌더링");
+	},[]);
+
 	// state 를 이용하는 방법이 동일하다 => 하나의 state 로 묶을 수 있다. => 객체로 전달
 	const [state, setState] = useState({
 		author: "", 
@@ -86,4 +94,4 @@ const DiaryEditor = ({onCreate} : {onCreate: ( diary : Omit<ListProps, "id"| "cr
 	)
 }
 
-export default DiaryEditor;
+export default React.memo(DiaryEditor);

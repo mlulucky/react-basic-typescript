@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList, { ListProps } from "./DiaryList";
@@ -41,22 +41,29 @@ function App() {
   }, []);
 
   // 일기 등록 함수
-  const createDiary = ({
-    author,
-    content,
-    emotion,
-  }: Omit<ListProps, "id" | "create_date">) => {
-    const create_date = new Date().getTime();
-    const newData = {
-      id: Id.current,
-      author,
-      content,
-      emotion,
-      create_date,
-    };
-    Id.current += 1; // 1씩 증가
-    setData([newData, ...data]); // 배열의 순서 [최신글, 기존글] : 최신글을 첫번째 인덱스로
-  };
+	// onCreate 라는 변수명으로 props 로 전달되는 함수
+	// 🍒 함수의 재생성을 막기위해 useCallback 훅으로 최적화하기!
+  const createDiary = useCallback(
+		({
+			author,
+			content,
+			emotion,
+		}: Omit<ListProps, "id" | "create_date">) => {
+			const create_date = new Date().getTime();
+			const newData = {
+				id: Id.current,
+				author,
+				content,
+				emotion,
+				create_date,
+			};
+			Id.current += 1; // 1씩 증가
+			setData((data)=> [newData, ...data]); // 배열의 순서 [최신글, 기존글] : 최신글을 첫번째 인덱스로
+		},[]); // 의존성배열 빈배열 : 처음 렌더됬을때 한번만 함수생성. 이후에는 기존 함수를 저장하여 사용.
+		// 🍒 처음렌더됬을때의 data 도 빈배열 [] 이기때문에 setData([newData, ...data]); 실행은 기존의 모든 데이터를 [] 빈배열로 하고. 새로 추가한 데이터만 data 로 저장하게 된다.
+		// => 해결책) 의존배열에 data 담기? NO! 함수형 업데이트를 하자!
+		// 함수형 업데이트란 ? setData(함수), setData 안에 함수를 전달하는 것!
+		// 함수형 업데이트를 하면 의존배열에 [data] 를 안담아도 최신의 state data 를 가져와서 상태를 저장할 수 있다. 
 
   // 일기 삭제 함수
   const deleteDiary = (targetId: number) => {
@@ -90,11 +97,6 @@ function App() {
 
   return (
     <div className="App">
-			<MyComponent prop={{name: "moon", color: "blue"}} title={undefined} year={2023} />
-			<ContainerTest title="Hello">
-				<p>이 부분은 ContainerTest 컴포넌트의 props 로 전달된 컴포넌트 children 입니다.</p>
-			</ContainerTest>
-      <OptimizeTest_Reference />
       <DiaryEditor onCreate={createDiary} />
       <div>전체 일기 : {data.length}</div>
       <div>기분 좋은 일기 개수 : {goodCount}</div>
