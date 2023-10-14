@@ -1,5 +1,5 @@
 import { useState } from "react";
-import OddEvenResult from "./\bOddEvenResult";
+import OddEvenResult from "./OddEvenResult";
 
 type Props = {
 	a : number;
