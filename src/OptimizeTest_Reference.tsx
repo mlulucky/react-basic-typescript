@@ -24,7 +24,7 @@ const MemoizedCounterB = React.memo(CounterB, areEqual);
 // React.memo 가 컴포넌트의 리렌더링이 필요한지 판단할때, areEqual 함수를 호출하여 매개변수 prevProps, nextProps 를 제공
 // areEqual 함수는 prevProps 와 nextProps 의 값이 동일한지 판단. 동일하면 true, 아니면 false 를 반환
 
-
+// props 비원시타입(객체) 컴포넌트 리렌터링 최적화 => React.memo(컴포넌트, areEqual함수)
 const OptimizeTest = () => {
 	// 참조타입(객체 타입) 상태
 	const [count, setCount] = useState(1);
