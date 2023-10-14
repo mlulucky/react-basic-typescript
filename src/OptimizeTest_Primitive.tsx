@@ -22,7 +22,7 @@ const TextView = React.memo(({propText} : {propText: string}) => {
 // TextView 는 count 상태와는 관련이 없기 때문에 count 상태가 업데이트되어도 리렌더링 될 필요가 없다
 // => 이를 해결하기위해, 컴포넌트의 props 데이터가 변하지 않으면 리렌더링 하지 않게 하기
 // React.memo(컴포넌트)로 컴포넌트를 감싼다!
-
+// props 원시타입 컴포넌트 리렌터링 최적화 => React.memo
 const OptimizeTest = () => {
 	// 원시타입(기본형 타입) 상태
 	const [count, setCount] = useState(1);
