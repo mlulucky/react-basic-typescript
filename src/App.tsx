@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList, { ListProps } from "./DiaryList";
-import LifeCycle from "./LifeCycle";
-import OptimizeTest from "./OptimizeTest_Primitive";
-import OptimizeTest_Reference from "./OptimizeTest_Reference";
-import ContainerTest from "./ContainerTest";
-import MyComponent from "./MyComponent";
+import "./App.css";
 
 type APIData = {
   email: string;
@@ -66,18 +61,16 @@ function App() {
 		// 함수형 업데이트를 하면 의존배열에 [data] 를 안담아도 최신의 state data 를 가져와서 상태를 저장할 수 있다. 
 
   // 일기 삭제 함수
-  const deleteDiary = (targetId: number) => {
-    const newDiaryList = data.filter((item) => item.id !== targetId);
-    setData(newDiaryList);
-  };
+  const deleteDiary = useCallback((targetId: number) => {
+    setData(data => data.filter((item) => item.id !== targetId));
+  },[]);
 
   // 일기 수정 함수
-  const modifyDiary = (targetId: number, newContent: string) => {
-    const newDiary = data.map((ele, index) =>
-      ele.id === targetId ? { ...ele, content: newContent } : { ...ele }
-    );
-    setData(newDiary);
-  };
+  const modifyDiary = useCallback((targetId: number, newContent: string) => {
+    setData(data => data.map((ele, index) =>
+		ele.id === targetId ? { ...ele, content: newContent } : { ...ele }
+	));
+  },[]);
 
   // 일기 분석 (data.length 변동시에만 렌더링 되도록 최적화하기! => 함수 렌더링 최적화 useMemo())
   // 한번 연산해둔 값을 저장해 두고 값을 사용하다가, 의존데이터가 변동시에만 다시 렌더링되게끔 연산 낭비를 막는다.

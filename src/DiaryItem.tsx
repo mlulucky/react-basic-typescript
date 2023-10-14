@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { useRef, useState } from "react";
 import { ListProps } from "./DiaryList";
 
@@ -10,17 +11,21 @@ type ListPropExtend = ListProps & {
 const DiaryItem = ({
   id,
   author,
-  content,
+  content, // 값이 바뀌는 state
   emotion,
   create_date,
-  onDelete,
-  onModify,
+  onDelete, // 함수
+  onModify, // 함수
 }: ListPropExtend) => {
   // 객체 ele 를 객체로 전달받는 방법
 
   const [showEdit, setShowEdit] = useState(false);
   const [newContent, setNewContent] = useState(content);
   const textAreaInput = useRef<HTMLTextAreaElement | null>(null);
+
+	useEffect(()=>{
+		console.log(`${id} 번째 DiaryItem 리렌더링`);
+	}) // 의존배열 없는 경우. 리렌더링 될때마다 useEffect 실행
 
   const removeDiary = () => {
     if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
@@ -95,4 +100,4 @@ const DiaryItem = ({
   // 🍒 사용할때, id / author / content ...
 };
 
-export default DiaryItem;
+export default React.memo(DiaryItem);
