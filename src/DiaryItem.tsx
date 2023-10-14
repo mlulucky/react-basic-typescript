@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
 import { ListProps } from "./DiaryList";
 
-type ListPropExtend = ListProps & { // 타입 병합
-	onDelete : (id: number) => void;
-	onModify: (id: number, content: string) => void;
-}
+type ListPropExtend = ListProps & {
+  // 타입 병합
+  onDelete: (id: number) => void;
+  onModify: (id: number, content: string) => void;
+};
 
 const DiaryItem = ({
   id,
@@ -12,44 +13,44 @@ const DiaryItem = ({
   content,
   emotion,
   create_date,
-	onDelete,
-	onModify
+  onDelete,
+  onModify,
 }: ListPropExtend) => {
   // 객체 ele 를 객체로 전달받는 방법
 
-	const [showEdit, setShowEdit] = useState(false);
-	const [newContent, setNewContent] = useState(content); 
-	const textAreaInput = useRef< HTMLTextAreaElement | null>(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [newContent, setNewContent] = useState(content);
+  const textAreaInput = useRef<HTMLTextAreaElement | null>(null);
 
-	const removeDiary = () => {
-		if(window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
-			onDelete(id);
-		}
-	}
+  const removeDiary = () => {
+    if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
+      onDelete(id);
+    }
+  };
 
-	const toggleShowEdit = () => {
-		setShowEdit(!showEdit);
-	}
+  const toggleShowEdit = () => {
+    setShowEdit(!showEdit);
+  };
 
-	const quitEdit = () => {
-		setNewContent(content);
-		toggleShowEdit();
-	}
+  const quitEdit = () => {
+    setNewContent(content);
+    toggleShowEdit();
+  };
 
-	const modifyContent = (e : React.ChangeEvent<HTMLTextAreaElement>) => {
-		setNewContent(e.target.value);
-	}
+  const modifyContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewContent(e.target.value);
+  };
 
-	const modifyDiary = () => {
-		if(newContent.length < 5) {
-			textAreaInput?.current?.focus();
-			return
-		}
-		if(window.confirm(`${id} 번째 일기를 정말 수정하시겠습니까?`)) {
-			onModify(id, newContent);
-		}
-		toggleShowEdit();
-	}
+  const modifyDiary = () => {
+    if (newContent.length < 5) {
+      textAreaInput?.current?.focus();
+      return;
+    }
+    if (window.confirm(`${id} 번째 일기를 정말 수정하시겠습니까?`)) {
+      onModify(id, newContent);
+    }
+    toggleShowEdit();
+  };
 
   return (
     <div className="DiaryItem">
@@ -57,33 +58,31 @@ const DiaryItem = ({
         <span>
           작성자: {author} | 감정점수 : {emotion}
         </span>
-				<div className="date">{new Date(create_date).toLocaleString()}</div>
+        <div className="date">{new Date(create_date).toLocaleString()}</div>
       </div>
-			{
-				showEdit ?
-				(
-					<>
-						<textarea ref={textAreaInput} value={newContent} onChange={modifyContent}></textarea>
-						<button onClick={quitEdit}>수정 취소</button>
-						<button onClick={modifyDiary}>수정 완료</button>
-					</>
-				)
-				:
-				(
-					<>
-						<div className="content">{content}</div>
-						<button onClick={removeDiary}>삭제하기</button>
-						<button onClick={toggleShowEdit}>수정하기</button>
-					</>
-					
-				)
-			}
+      {showEdit ? (
+        <>
+          <textarea
+            ref={textAreaInput}
+            value={newContent}
+            onChange={modifyContent}
+          ></textarea>
+          <button onClick={quitEdit}>수정 취소</button>
+          <button onClick={modifyDiary}>수정 완료</button>
+        </>
+      ) : (
+        <>
+          <div className="content">{content}</div>
+          <button onClick={removeDiary}>삭제하기</button>
+          <button onClick={toggleShowEdit}>수정하기</button>
+        </>
+      )}
     </div>
   );
 
   // onClick 이벤트 핸들러에서는 함수를 바로 호출하면 안된다. onClick={함수()} // 함수실행
-	// 🍒 함수 전달하기 (클릭했을때, 함수실행)
-	// onClick={함수명} || onClick={()=>{ 함수실행 }}
+  // 🍒 함수 전달하기 (클릭했을때, 함수실행)
+  // onClick={함수명} || onClick={()=>{ 함수실행 }}
 
   // new Date(시간).toLocaleString() : date 객체 생성
 
