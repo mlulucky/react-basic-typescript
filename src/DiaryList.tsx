@@ -5,7 +5,7 @@ export type ListProps = {
   author: string;
   content: string;
   emotion: number;
-  create_date: number;
+  create_date?: number;
 };
 
 type DiaryListProps = {

@@ -63,7 +63,7 @@ const DiaryItem = ({
         <span>
           작성자: {author} | 감정점수 : {emotion}
         </span>
-        <div className="date">{new Date(create_date).toLocaleString()}</div>
+        <div className="date">{create_date ? new Date(create_date).toLocaleString(): 'N/A'}</div>
       </div>
       {showEdit ? (
         <>

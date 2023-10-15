@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList, { ListProps } from "./DiaryList";
 import "./App.css";
@@ -8,9 +14,56 @@ type APIData = {
   body: string;
 };
 
+type StateType = {
+  id: number;
+  author: string;
+  content: string;
+  emotion: number;
+  create_date?: number;
+};
+
+type ActionType =
+  | { type: "INIT"; data: StateType[] }
+  | { type: "CREATE"; data: StateType }
+  | { type: "DELETE"; targetId: number }
+  | { type: "MODIFY"; targetId: number; newContent: string };
+
+// 🍒reducer 함수
+const reducer = (state: StateType[], action: ActionType): StateType[] => { // reducer 함수 반환타입 : StateType[]
+	// reducer 함수의 반환타입 꼭 적어야한다!! 안적으니 dsipatch 타입이 (value: ActionType) => void 에서 () => void 매개변수없는 타입으로 나와서, dispatch 에서 전부 에러 터짐
+  // dispatch(action) === dispatch({action.type, action.data})
+  // state 즉 data 변경 상태 // getData, create, delete, modify
+  // setData() 를 대체 => dispatch()
+  switch (action.type) {
+    case "INIT": {
+      return action.data;
+    }
+    case "CREATE": {
+      const create_date = new Date().getTime();
+      const newData = {
+        ...action.data,
+        create_date,
+      };
+      return [newData, ...state]; // state 는 변경직전 state // 즉, state === [newData, ...state]
+    }
+    case "DELETE":
+      return state.filter((item) => item.id !== action.targetId);
+    case "MODIFY":
+      return state.map((item) =>
+        item.id === action.targetId
+          ? { ...item, content: action.newContent }
+          : item
+      );
+    default:
+      return state; // 기존 상태 반환
+  }
+};
+
 function App() {
-  const [data, setData] = useState<ListProps[]>([]); // 일기 [item1, item2...]
-  const Id = useRef(0); // useRef(): 데이터가 변해도 리렌더링 X
+  const initialState: StateType[] = [];
+  // 🍒useState 말고. useReducer 훅으로 컴포넌트와 분리해서 state(상태)관리하기!
+ const [data, dispatch] = useReducer(reducer, initialState); // useReducer(reducer 함수, 초기State(data))
+ const Id = useRef(0); // useRef(): 데이터가 변해도 리렌더링 X
 
   // API 호출
   const getData = async () => {
@@ -28,7 +81,7 @@ function App() {
         create_date,
       };
     });
-    setData(apiData);
+    dispatch({ type: "INIT", data: apiData }); // data == action.data
   };
 
   useEffect(() => {
@@ -36,41 +89,28 @@ function App() {
   }, []);
 
   // 일기 등록 함수
-	// onCreate 라는 변수명으로 props 로 전달되는 함수
-	// 🍒 함수의 재생성을 막기위해 useCallback 훅으로 최적화하기!
+  // onCreate 라는 변수명으로 props 로 전달되는 함수
+  // 🍒 함수의 재생성을 막기위해 useCallback 훅으로 최적화하기!
   const createDiary = useCallback(
-		({
-			author,
-			content,
-			emotion,
-		}: Omit<ListProps, "id" | "create_date">) => {
-			const create_date = new Date().getTime();
-			const newData = {
-				id: Id.current,
-				author,
-				content,
-				emotion,
-				create_date,
-			};
-			Id.current += 1; // 1씩 증가
-			setData((data)=> [newData, ...data]); // 배열의 순서 [최신글, 기존글] : 최신글을 첫번째 인덱스로
-		},[]); // 의존성배열 빈배열 : 처음 렌더됬을때 한번만 함수생성. 이후에는 기존 함수를 저장하여 사용.
-		// 🍒 처음렌더됬을때의 data 도 빈배열 [] 이기때문에 setData([newData, ...data]); 실행은 기존의 모든 데이터를 [] 빈배열로 하고. 새로 추가한 데이터만 data 로 저장하게 된다.
-		// => 해결책) 의존배열에 data 담기? NO! 함수형 업데이트를 하자!
-		// 함수형 업데이트란 ? setData(함수), setData 안에 함수를 전달하는 것!
-		// 함수형 업데이트를 하면 의존배열에 [data] 를 안담아도 최신의 state data 를 가져와서 상태를 저장할 수 있다. 
+    ({ author, content, emotion }: Omit<ListProps, "id" | "create_date">) => {
+      Id.current += 1; // 1씩 증가
+      dispatch({type: "CREATE", data: { author, content, emotion, id: Id.current }});
+    },
+    []); // 의존성배열 빈배열 : 처음 렌더됬을때 한번만 함수생성. 이후에는 기존 함수를 저장하여 사용.
+  // 🍒 처음렌더됬을때의 data 도 빈배열 [] 이기때문에 setData([newData, ...data]); 실행은 기존의 모든 데이터를 [] 빈배열로 하고. 새로 추가한 데이터만 data 로 저장하게 된다.
+  // => 해결책) 의존배열에 data 담기? NO! 함수형 업데이트를 하자!
+  // 함수형 업데이트란 ? setData(함수), setData 안에 함수를 전달하는 것!
+  // 함수형 업데이트를 하면 의존배열에 [data] 를 안담아도 최신의 state data 를 가져와서 상태를 저장할 수 있다.
 
   // 일기 삭제 함수
   const deleteDiary = useCallback((targetId: number) => {
-    setData(data => data.filter((item) => item.id !== targetId));
-  },[]);
+    dispatch({ type: "DELETE", targetId }); // targetId == action.targetId
+  }, []);
 
   // 일기 수정 함수
   const modifyDiary = useCallback((targetId: number, newContent: string) => {
-    setData(data => data.map((ele, index) =>
-		ele.id === targetId ? { ...ele, content: newContent } : { ...ele }
-	));
-  },[]);
+    dispatch({ type: "MODIFY", targetId, newContent });
+  }, []);
 
   // 일기 분석 (data.length 변동시에만 렌더링 되도록 최적화하기! => 함수 렌더링 최적화 useMemo())
   // 한번 연산해둔 값을 저장해 두고 값을 사용하다가, 의존데이터가 변동시에만 다시 렌더링되게끔 연산 낭비를 막는다.
