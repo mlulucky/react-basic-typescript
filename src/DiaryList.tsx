@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { DiaryDispatchContext, DiaryStateContext } from "./App";
 import DiaryItem from "./DiaryItem";
 
 export type ListProps = {
@@ -9,14 +11,14 @@ export type ListProps = {
 };
 
 type DiaryListProps = {
-  dummyData: ListProps[];
 	onDelete: (id: number) => void;
 	onModify: (id: number, content: string) => void;
 };
 
-const DiaryList = ({ dummyData, onDelete, onModify }: DiaryListProps) => {
-  // 비구조화 할당
-  console.log(dummyData);
+const DiaryList = () => {
+  // Context.Provider 에서 값 가져오기
+	// 리액트 개발자도구에서 hooks - context 로 값이 불러와졌는지 확인가능 
+	const dummyData = useContext(DiaryStateContext);
 
   return (
     <div className="DiaryList">
@@ -25,7 +27,7 @@ const DiaryList = ({ dummyData, onDelete, onModify }: DiaryListProps) => {
       <div>
         {dummyData.map((ele)=> // {...ele} : ele 에 포함된 모든 객체데이터를 props 를 전달
 				  (
-            <DiaryItem key={ele.id} {...ele} onDelete={onDelete} onModify={onModify}/>
+            <DiaryItem key={ele.id} {...ele}/>
           ),
         )}
       </div>
@@ -39,8 +41,9 @@ const DiaryList = ({ dummyData, onDelete, onModify }: DiaryListProps) => {
 };
 
 // 🍒 defaultProps : undefined 로 넘어올수있는 props 의 기본값을 설정
-DiaryList.defaultProps = {
-  dummyData: [],
-};
+// DiaryList.defaultProps = {
+//   dummyData: [],
+// };
+// -> 리액트 Context Provider 로 데이터 전달해서 props 로 데이터 전달안해도됨. 기본props 설정필요X
 
 export default DiaryList;

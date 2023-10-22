@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useRef, useState } from "react";
+import { DiaryDispatchContext } from "./App";
 import { ListProps } from "./DiaryList";
 
 // 함수 내에서 diary 라는 이름으로 ListProps 타입 객체를 사용할 수 있다. (React 컴포넌트에서 props 전달시, 해당 변수의 이름과 타입만 중요, 함수 내부의 변수이름은 무관하다.)
@@ -7,7 +8,9 @@ import { ListProps } from "./DiaryList";
 // => props 데이터가 변경 되면 컴포넌트도 리렌더링된다. 즉 DiaryEditor 컴포넌트가 재렌더링이된다.
 // => 최적화 하기위해서 onCreate 함수를 재생성하지 않도록 하기!
 // => App 컴포넌트에서 onCreate 함수에 useCallback 최적화하기!
-const DiaryEditor = ({onCreate} : {onCreate : (함수매개변수이름 : Omit<ListProps, "id"| "create_date">) => void}) => {
+const DiaryEditor = () => {
+	const {createDiary} = useContext(DiaryDispatchContext);
+
 	useEffect(()=>{ // 렌더링 체크
 		console.log("DiaryEditor 렌더링");
 	},[]);
@@ -51,7 +54,7 @@ const DiaryEditor = ({onCreate} : {onCreate : (함수매개변수이름 : Omit<L
 		}
 
 		// 입력한 author, content, emotion 을 등록
-		onCreate({ author: state.author, content: state.content, emotion: state.emotion });
+		createDiary({ author: state.author, content: state.content, emotion: state.emotion });
 		setState({ // 등록 후, 입력값 초기화
 			author: "",
 			content: "",

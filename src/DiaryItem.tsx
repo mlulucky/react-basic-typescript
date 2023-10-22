@@ -1,11 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { useRef, useState } from "react";
+import { DiaryDispatchContext } from "./App";
 import { ListProps } from "./DiaryList";
 
 type ListPropExtend = ListProps & {
   // 타입 병합
-  onDelete: (id: number) => void;
-  onModify: (id: number, content: string) => void;
+  onDelete?: (id: number) => void;
+  onModify?: (id: number, content: string) => void;
 };
 
 const DiaryItem = ({
@@ -13,9 +14,7 @@ const DiaryItem = ({
   author,
   content, // 값이 바뀌는 state
   emotion,
-  create_date,
-  onDelete, // 함수
-  onModify, // 함수
+  create_date
 }: ListPropExtend) => {
   // 객체 ele 를 객체로 전달받는 방법
 
@@ -23,13 +22,15 @@ const DiaryItem = ({
   const [newContent, setNewContent] = useState(content);
   const textAreaInput = useRef<HTMLTextAreaElement | null>(null);
 
+	const {deleteDiary, modifyDiary} = useContext(DiaryDispatchContext)
+
 	useEffect(()=>{
 		console.log(`${id} 번째 DiaryItem 리렌더링`);
 	}) // 의존배열 없는 경우. 리렌더링 될때마다 useEffect 실행
 
   const removeDiary = () => {
     if (window.confirm(`${id} 번째 일기를 정말 삭제하시겠습니까?`)) {
-      onDelete(id);
+      deleteDiary(id);
     }
   };
 
@@ -46,13 +47,13 @@ const DiaryItem = ({
     setNewContent(e.target.value);
   };
 
-  const modifyDiary = () => {
+  const modifyHandler = () => {
     if (newContent.length < 5) {
       textAreaInput?.current?.focus();
       return;
     }
     if (window.confirm(`${id} 번째 일기를 정말 수정하시겠습니까?`)) {
-      onModify(id, newContent);
+      modifyDiary(id, newContent);
     }
     toggleShowEdit();
   };
@@ -73,7 +74,7 @@ const DiaryItem = ({
             onChange={modifyContent}
           ></textarea>
           <button onClick={quitEdit}>수정 취소</button>
-          <button onClick={modifyDiary}>수정 완료</button>
+          <button onClick={modifyHandler}>수정 완료</button>
         </>
       ) : (
         <>

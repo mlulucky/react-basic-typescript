@@ -1,5 +1,5 @@
 import {
-  useCallback,
+  useCallback,  
   useEffect,
   useMemo,
   useReducer,
@@ -8,13 +8,14 @@ import {
 import DiaryEditor from "./DiaryEditor";
 import DiaryList, { ListProps } from "./DiaryList";
 import "./App.css";
+import React from "react";
 
 type APIData = {
   email: string;
   body: string;
 };
 
-type StateType = {
+type StateType  = {
   id: number;
   author: string;
   content: string;
@@ -58,6 +59,13 @@ const reducer = (state: StateType[], action: ActionType): StateType[] => { // re
       return state; // 기존 상태 반환
   }
 };
+
+export const DiaryStateContext = React.createContext<StateType[]>([]);
+export const DiaryDispatchContext = React.createContext({ // 타입<> 별도 명시x => ()=>{} 로 타입추론
+	createDiary: (data: Omit<ListProps, "id" | "create_date">) => {},
+  deleteDiary: (targetId: number) => {},
+  modifyDiary: (targetId: number, newContent: string) => {}
+});
 
 function App() {
   const initialState: StateType[] = [];
@@ -112,7 +120,13 @@ function App() {
     dispatch({ type: "MODIFY", targetId, newContent });
   }, []);
 
-  // 일기 분석 (data.length 변동시에만 렌더링 되도록 최적화하기! => 함수 렌더링 최적화 useMemo())
+	// Context Provider 로 dispatch CRUD 함수 전달하기
+	// (useMemo 사용하는 이유 - App 컴포넌트가 리렌더링될때, 함수를 묶은 객체 {createDiary, deleteDiary, modifyDiary} 가 재렌더링 하는것을 방지하기 위해)
+	const dispatchFunc = useMemo(()=> {
+		return {createDiary, deleteDiary, modifyDiary}
+	},[]);
+
+  // 일기 분석 (data.length 변동시에만 렌더링 되도록 최적화하기! => 연산값 렌더링 최적화 useMemo())
   // 한번 연산해둔 값을 저장해 두고 값을 사용하다가, 의존데이터가 변동시에만 다시 렌더링되게끔 연산 낭비를 막는다.
   const getDiaryAnalysis = useMemo(() => {
     // getDiaryAnalysis 는 return 된 값! (더이상 함수 X)
@@ -128,20 +142,23 @@ function App() {
 
   const { goodCount, badCount, goodRate } = getDiaryAnalysis;
 
+
+
   return (
-    <div className="App">
-      <DiaryEditor onCreate={createDiary} />
-      <div>전체 일기 : {data.length}</div>
-      <div>기분 좋은 일기 개수 : {goodCount}</div>
-      <div>기분 나쁜 일기 개수 : {badCount}</div>
-      <div>기분 좋은 일기 비율 : {goodRate}</div>
-      <div></div>
-      <DiaryList
-        dummyData={data}
-        onDelete={deleteDiary}
-        onModify={modifyDiary}
-      />
-    </div>
+		// Context.Provider 공급자 컴포넌트
+		<DiaryStateContext.Provider value={data}>
+			<DiaryDispatchContext.Provider value={dispatchFunc}>
+				<div className="App">
+					<DiaryEditor/>
+					<div>전체 일기 : {data.length}</div>
+					<div>기분 좋은 일기 개수 : {goodCount}</div>
+					<div>기분 나쁜 일기 개수 : {badCount}</div>
+					<div>기분 좋은 일기 비율 : {goodRate}</div>
+					<div></div>
+					<DiaryList/>
+				</div>
+			</DiaryDispatchContext.Provider>
+		</DiaryStateContext.Provider>
   );
 }
 
